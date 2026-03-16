@@ -1,0 +1,208 @@
+from http import HTTPStatus
+from typing import Any
+from urllib.parse import quote
+
+import httpx
+
+from ... import errors
+from ...client import AuthenticatedClient, Client
+from ...models.freight_offer_response import FreightOfferResponse
+from ...models.problem import Problem
+from ...types import UNSET, Response
+
+
+def _get_kwargs(
+    public_offer_id: str,
+    *,
+    timocom_id: int,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
+
+    params["timocom_id"] = timocom_id
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
+    _kwargs: dict[str, Any] = {
+        "method": "get",
+        "url": "/my-freight-offers/{public_offer_id}".format(
+            public_offer_id=quote(str(public_offer_id), safe=""),
+        ),
+        "params": params,
+    }
+
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> FreightOfferResponse | Problem | None:
+    if response.status_code == 200:
+        response_200 = FreightOfferResponse.from_dict(response.json())
+
+        return response_200
+
+    if response.status_code == 400:
+        response_400 = Problem.from_dict(response.json())
+
+        return response_400
+
+    if response.status_code == 404:
+        response_404 = Problem.from_dict(response.json())
+
+        return response_404
+
+    if response.status_code == 422:
+        response_422 = Problem.from_dict(response.json())
+
+        return response_422
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    else:
+        return None
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[FreightOfferResponse | Problem]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    public_offer_id: str,
+    *,
+    client: AuthenticatedClient,
+    timocom_id: int,
+) -> Response[FreightOfferResponse | Problem]:
+    """Lookup Your Own Freight Offer
+
+     Get your own Freight Offer by its ID.
+
+    Args:
+        public_offer_id (str): Alphanumeric unique ID which is used to identify an entity (freight
+            offer, vehicle space offer, freight quote) in the TIMOCOM system. Will be generated on
+            TIMOCOM side, only. Example: NdKoYeUDQheRB14EeyJzTg.
+        timocom_id (int): Unique ID of a customer on TIMOCOM side. Example: 288.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[FreightOfferResponse | Problem]
+    """
+
+    kwargs = _get_kwargs(
+        public_offer_id=public_offer_id,
+        timocom_id=timocom_id,
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    public_offer_id: str,
+    *,
+    client: AuthenticatedClient,
+    timocom_id: int,
+) -> FreightOfferResponse | Problem | None:
+    """Lookup Your Own Freight Offer
+
+     Get your own Freight Offer by its ID.
+
+    Args:
+        public_offer_id (str): Alphanumeric unique ID which is used to identify an entity (freight
+            offer, vehicle space offer, freight quote) in the TIMOCOM system. Will be generated on
+            TIMOCOM side, only. Example: NdKoYeUDQheRB14EeyJzTg.
+        timocom_id (int): Unique ID of a customer on TIMOCOM side. Example: 288.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        FreightOfferResponse | Problem
+    """
+
+    return sync_detailed(
+        public_offer_id=public_offer_id,
+        client=client,
+        timocom_id=timocom_id,
+    ).parsed
+
+
+async def asyncio_detailed(
+    public_offer_id: str,
+    *,
+    client: AuthenticatedClient,
+    timocom_id: int,
+) -> Response[FreightOfferResponse | Problem]:
+    """Lookup Your Own Freight Offer
+
+     Get your own Freight Offer by its ID.
+
+    Args:
+        public_offer_id (str): Alphanumeric unique ID which is used to identify an entity (freight
+            offer, vehicle space offer, freight quote) in the TIMOCOM system. Will be generated on
+            TIMOCOM side, only. Example: NdKoYeUDQheRB14EeyJzTg.
+        timocom_id (int): Unique ID of a customer on TIMOCOM side. Example: 288.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[FreightOfferResponse | Problem]
+    """
+
+    kwargs = _get_kwargs(
+        public_offer_id=public_offer_id,
+        timocom_id=timocom_id,
+    )
+
+    response = await client.get_async_httpx_client().request(**kwargs)
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    public_offer_id: str,
+    *,
+    client: AuthenticatedClient,
+    timocom_id: int,
+) -> FreightOfferResponse | Problem | None:
+    """Lookup Your Own Freight Offer
+
+     Get your own Freight Offer by its ID.
+
+    Args:
+        public_offer_id (str): Alphanumeric unique ID which is used to identify an entity (freight
+            offer, vehicle space offer, freight quote) in the TIMOCOM system. Will be generated on
+            TIMOCOM side, only. Example: NdKoYeUDQheRB14EeyJzTg.
+        timocom_id (int): Unique ID of a customer on TIMOCOM side. Example: 288.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        FreightOfferResponse | Problem
+    """
+
+    return (
+        await asyncio_detailed(
+            public_offer_id=public_offer_id,
+            client=client,
+            timocom_id=timocom_id,
+        )
+    ).parsed
