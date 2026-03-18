@@ -6,7 +6,6 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.freight_exchange_response import FreightExchangeResponse
 from ...types import UNSET, Response
 
 
@@ -33,13 +32,9 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> FreightExchangeResponse | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Any | None:
     if response.status_code == 204:
-        response_204 = FreightExchangeResponse.from_dict(response.json())
-
-        return response_204
+        return None
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -47,9 +42,7 @@ def _parse_response(
         return None
 
 
-def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[FreightExchangeResponse]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Any]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -63,7 +56,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     timocom_id: int,
-) -> Response[FreightExchangeResponse]:
+) -> Response[Any]:
     """Withdraw Freight Quote
 
      Withdraw a freight quote
@@ -79,7 +72,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[FreightExchangeResponse]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -94,43 +87,12 @@ def sync_detailed(
     return _build_response(client=client, response=response)
 
 
-def sync(
-    freight_quote_id: str,
-    *,
-    client: AuthenticatedClient,
-    timocom_id: int,
-) -> FreightExchangeResponse | None:
-    """Withdraw Freight Quote
-
-     Withdraw a freight quote
-
-    Args:
-        freight_quote_id (str): Alphanumeric unique ID which is used to identify an entity
-            (freight offer, vehicle space offer, freight quote) in the TIMOCOM system. Will be
-            generated on TIMOCOM side, only. Example: NdKoYeUDQheRB14EeyJzTg.
-        timocom_id (int): Unique ID of a customer on TIMOCOM side. Example: 288.
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        FreightExchangeResponse
-    """
-
-    return sync_detailed(
-        freight_quote_id=freight_quote_id,
-        client=client,
-        timocom_id=timocom_id,
-    ).parsed
-
-
 async def asyncio_detailed(
     freight_quote_id: str,
     *,
     client: AuthenticatedClient,
     timocom_id: int,
-) -> Response[FreightExchangeResponse]:
+) -> Response[Any]:
     """Withdraw Freight Quote
 
      Withdraw a freight quote
@@ -146,7 +108,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[FreightExchangeResponse]
+        Response[Any]
     """
 
     kwargs = _get_kwargs(
@@ -157,36 +119,3 @@ async def asyncio_detailed(
     response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
-
-
-async def asyncio(
-    freight_quote_id: str,
-    *,
-    client: AuthenticatedClient,
-    timocom_id: int,
-) -> FreightExchangeResponse | None:
-    """Withdraw Freight Quote
-
-     Withdraw a freight quote
-
-    Args:
-        freight_quote_id (str): Alphanumeric unique ID which is used to identify an entity
-            (freight offer, vehicle space offer, freight quote) in the TIMOCOM system. Will be
-            generated on TIMOCOM side, only. Example: NdKoYeUDQheRB14EeyJzTg.
-        timocom_id (int): Unique ID of a customer on TIMOCOM side. Example: 288.
-
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
-
-    Returns:
-        FreightExchangeResponse
-    """
-
-    return (
-        await asyncio_detailed(
-            freight_quote_id=freight_quote_id,
-            client=client,
-            timocom_id=timocom_id,
-        )
-    ).parsed
