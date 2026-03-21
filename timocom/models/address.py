@@ -159,6 +159,7 @@ class Address:
         if postal_code is not UNSET:
             field_dict["postalCode"] = postal_code
 
+        field_dict['objectType'] = 'address'
         return field_dict
 
     @classmethod

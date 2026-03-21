@@ -205,6 +205,7 @@ class FreightOffer:
         if price is not UNSET:
             field_dict["price"] = price
 
+        field_dict['objectType'] = 'freightOffer'
         return field_dict
 
     @classmethod

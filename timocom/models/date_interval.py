@@ -50,6 +50,7 @@ class DateInterval:
         if end is not UNSET:
             field_dict["end"] = end
 
+        field_dict['objectType'] = 'dateInterval'
         return field_dict
 
     @classmethod

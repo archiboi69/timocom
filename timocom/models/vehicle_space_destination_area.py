@@ -42,6 +42,7 @@ class VehicleSpaceDestinationArea:
         if area is not UNSET:
             field_dict["area"] = area
 
+        field_dict['objectType'] = 'vehicleSpaceDestinationArea'
         return field_dict
 
     @classmethod

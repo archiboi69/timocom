@@ -45,6 +45,7 @@ class IndividualDates:
         if dates is not UNSET:
             field_dict["dates"] = dates
 
+        field_dict['objectType'] = 'individualDates'
         return field_dict
 
     @classmethod

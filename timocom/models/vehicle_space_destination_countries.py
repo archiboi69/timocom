@@ -40,6 +40,7 @@ class VehicleSpaceDestinationCountries:
         if countries is not UNSET:
             field_dict["countries"] = countries
 
+        field_dict['objectType'] = 'vehicleSpaceDestinationCountries'
         return field_dict
 
     @classmethod

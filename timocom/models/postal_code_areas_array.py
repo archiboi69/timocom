@@ -46,6 +46,7 @@ class PostalCodeAreasArray:
         if postal_code_areas is not UNSET:
             field_dict["postalCodeAreas"] = postal_code_areas
 
+        field_dict['objectType'] = 'postalCodeAreasArray'
         return field_dict
 
     @classmethod

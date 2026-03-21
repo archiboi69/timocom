@@ -203,6 +203,7 @@ class VehicleSpaceOffer:
         if truck_weight_t is not UNSET:
             field_dict["truckWeight_t"] = truck_weight_t
 
+        field_dict['objectType'] = 'vehicleSpaceOffer'
         return field_dict
 
     @classmethod

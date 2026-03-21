@@ -164,6 +164,7 @@ class PostalAddress:
         if street_or_postbox is not UNSET:
             field_dict["streetOrPostbox"] = street_or_postbox
 
+        field_dict['objectType'] = 'postalAddress'
         return field_dict
 
     @classmethod
