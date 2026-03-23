@@ -1,8 +1,116 @@
 import ssl
+import time
 from typing import Any
 
 import httpx
 from attrs import define, evolve, field
+
+from timocom.observability import (
+    log_sdk_event,
+    provider_request_id,
+    redact_headers,
+    request_operation,
+    serialize_request_content,
+    serialize_response_body,
+)
+
+
+class _ObservedSyncClient:
+    def __init__(self, client: httpx.Client):
+        self._client = client
+
+    def request(self, method: str, url: str, *args: Any, **kwargs: Any) -> httpx.Response:
+        started_at = time.monotonic()
+        operation = request_operation(method, str(self._client.base_url.join(url)))
+        try:
+            response = self._client.request(method, url, *args, **kwargs)
+        except httpx.HTTPError as exc:
+            log_sdk_event(
+                "sdk.timocom.http",
+                operation=operation,
+                method=method,
+                url=str(self._client.base_url.join(url)),
+                duration_ms=(time.monotonic() - started_at) * 1000,
+                request_body=serialize_request_content(kwargs.get("content")),
+                error={"type": type(exc).__name__, "retryable": True, "detail": str(exc)},
+            )
+            raise
+
+        log_sdk_event(
+            "sdk.timocom.http",
+            operation=operation,
+            method=method,
+            url=str(response.request.url),
+            status_code=response.status_code,
+            duration_ms=(time.monotonic() - started_at) * 1000,
+            provider_request_id=provider_request_id(response),
+            request_body=serialize_request_content(response.request.content),
+            response_headers=redact_headers(dict(response.headers)),
+            response_body=serialize_response_body(response),
+            error=None
+            if response.status_code < 400
+            else {"type": "provider_error", "retryable": response.status_code >= 500},
+        )
+        return response
+
+    def __enter__(self) -> "_ObservedSyncClient":
+        self._client.__enter__()
+        return self
+
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
+        self._client.__exit__(*args, **kwargs)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._client, name)
+
+
+class _ObservedAsyncClient:
+    def __init__(self, client: httpx.AsyncClient):
+        self._client = client
+
+    async def request(self, method: str, url: str, *args: Any, **kwargs: Any) -> httpx.Response:
+        started_at = time.monotonic()
+        operation = request_operation(method, str(self._client.base_url.join(url)))
+        try:
+            response = await self._client.request(method, url, *args, **kwargs)
+        except httpx.HTTPError as exc:
+            log_sdk_event(
+                "sdk.timocom.http",
+                operation=operation,
+                method=method,
+                url=str(self._client.base_url.join(url)),
+                duration_ms=(time.monotonic() - started_at) * 1000,
+                request_body=serialize_request_content(kwargs.get("content")),
+                error={"type": type(exc).__name__, "retryable": True, "detail": str(exc)},
+            )
+            raise
+
+        log_sdk_event(
+            "sdk.timocom.http",
+            operation=operation,
+            method=method,
+            url=str(response.request.url),
+            status_code=response.status_code,
+            duration_ms=(time.monotonic() - started_at) * 1000,
+            provider_request_id=provider_request_id(response),
+            request_body=serialize_request_content(response.request.content),
+            response_headers=redact_headers(dict(response.headers)),
+            response_body=serialize_response_body(response),
+            error=None
+            if response.status_code < 400
+            else {"type": "provider_error", "retryable": response.status_code >= 500},
+        )
+        return response
+
+    async def __aenter__(self) -> "_ObservedAsyncClient":
+        await self._client.__aenter__()
+        return self
+
+    async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
+        await self._client.__aexit__(*args, **kwargs)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._client, name)
 
 
 @define
@@ -89,7 +197,7 @@ class Client:
                 follow_redirects=self._follow_redirects,
                 **self._httpx_args,
             )
-        return self._client
+        return _ObservedSyncClient(self._client)
 
     def __enter__(self) -> "Client":
         """Enter a context manager for self.client—you cannot enter twice (see httpx docs)"""
@@ -120,7 +228,7 @@ class Client:
                 follow_redirects=self._follow_redirects,
                 **self._httpx_args,
             )
-        return self._async_client
+        return _ObservedAsyncClient(self._async_client)
 
     async def __aenter__(self) -> "Client":
         """Enter a context manager for underlying httpx.AsyncClient—you cannot enter twice (see httpx docs)"""
@@ -224,7 +332,7 @@ class AuthenticatedClient:
                 follow_redirects=self._follow_redirects,
                 **self._httpx_args,
             )
-        return self._client
+        return _ObservedSyncClient(self._client)
 
     def __enter__(self) -> "AuthenticatedClient":
         """Enter a context manager for self.client—you cannot enter twice (see httpx docs)"""
@@ -256,7 +364,7 @@ class AuthenticatedClient:
                 follow_redirects=self._follow_redirects,
                 **self._httpx_args,
             )
-        return self._async_client
+        return _ObservedAsyncClient(self._async_client)
 
     async def __aenter__(self) -> "AuthenticatedClient":
         """Enter a context manager for underlying httpx.AsyncClient—you cannot enter twice (see httpx docs)"""
