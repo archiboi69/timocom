@@ -241,7 +241,7 @@ class FreightOffer:
 
         _closed_freight_exchange_setting = d.pop("closedFreightExchangeSetting", UNSET)
         closed_freight_exchange_setting: ClosedFreightExchangeSetting | Unset
-        if isinstance(_closed_freight_exchange_setting, Unset):
+        if isinstance(_closed_freight_exchange_setting, Unset) or _closed_freight_exchange_setting is None:
             closed_freight_exchange_setting = UNSET
         else:
             closed_freight_exchange_setting = ClosedFreightExchangeSetting.from_dict(_closed_freight_exchange_setting)
@@ -255,7 +255,7 @@ class FreightOffer:
 
         _customer = d.pop("customer", UNSET)
         customer: Customer | Unset
-        if isinstance(_customer, Unset):
+        if isinstance(_customer, Unset) or _customer is None:
             customer = UNSET
         else:
             customer = Customer.from_dict(_customer)
@@ -282,7 +282,7 @@ class FreightOffer:
 
         _price = d.pop("price", UNSET)
         price: Money | Unset
-        if isinstance(_price, Unset):
+        if isinstance(_price, Unset) or _price is None:
             price = UNSET
         else:
             price = Money.from_dict(_price)

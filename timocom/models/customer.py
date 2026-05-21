@@ -99,14 +99,14 @@ class Customer:
 
         _company_address = d.pop("companyAddress", UNSET)
         company_address: PostalAddress | Unset
-        if isinstance(_company_address, Unset):
+        if isinstance(_company_address, Unset) or _company_address is None:
             company_address = UNSET
         else:
             company_address = PostalAddress.from_dict(_company_address)
 
         _creation_date_time = d.pop("creationDateTime", UNSET)
         creation_date_time: datetime.datetime | Unset
-        if isinstance(_creation_date_time, Unset):
+        if isinstance(_creation_date_time, Unset) or _creation_date_time is None:
             creation_date_time = UNSET
         else:
             creation_date_time = isoparse(_creation_date_time)
@@ -119,7 +119,7 @@ class Customer:
 
         _postal_address = d.pop("postalAddress", UNSET)
         postal_address: PostalAddress | Unset
-        if isinstance(_postal_address, Unset):
+        if isinstance(_postal_address, Unset) or _postal_address is None:
             postal_address = UNSET
         else:
             postal_address = PostalAddress.from_dict(_postal_address)
